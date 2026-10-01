@@ -1,0 +1,138 @@
+{
+  "model_type": "XGBClassifier",
+  "objective": "multi:softprob",
+  "hyperparameters": {
+    "objective": "multi:softprob",
+    "num_class": 4,
+    "n_estimators": 150,
+    "max_depth": 4,
+    "learning_rate": 0.08,
+    "subsample": 0.85,
+    "colsample_bytree": 0.85,
+    "min_child_weight": 3,
+    "reg_lambda": 1.0,
+    "random_state": 42,
+    "n_jobs": 1,
+    "tree_method": "hist",
+    "eval_metric": "mlogloss"
+  },
+  "class_weighting": {
+    "method": "sklearn.utils.class_weight.compute_sample_weight",
+    "strategy": "balanced",
+    "description": "Each training row is weighted as n_samples / (n_classes * n_samples_for_class). Weights are applied only through XGBClassifier.fit(sample_weight=...). SMOTE is not used. Test rows are unweighted."
+  },
+  "feature_names": [
+    "depth",
+    "rop",
+    "wob",
+    "rpm",
+    "torque",
+    "standpipe_pressure",
+    "mud_density"
+  ],
+  "target": "event_label",
+  "classes": {
+    "0": "NORMAL",
+    "1": "STUCK_PIPE",
+    "2": "MUD_LOSS",
+    "3": "HIGH_TORQUE"
+  },
+  "split_method": "GroupShuffleSplit",
+  "test_well_fraction": 0.2,
+  "random_state": 42,
+  "training_row_count": 2400,
+  "testing_row_count": 600,
+  "training_well_ids": [
+    "W003",
+    "W004",
+    "W005",
+    "W006",
+    "W007",
+    "W008",
+    "W009",
+    "W010",
+    "W011",
+    "W012",
+    "W013",
+    "W014",
+    "W015",
+    "W017",
+    "W019",
+    "W020"
+  ],
+  "testing_well_ids": [
+    "W001",
+    "W002",
+    "W016",
+    "W018"
+  ],
+  "accuracy": 0.9216666666666666,
+  "macro_f1": 0.7141204752326937,
+  "weighted_f1": 0.9236049452065002,
+  "per_class_metrics": {
+    "NORMAL": {
+      "precision": 0.9728682170542635,
+      "recall": 0.9616858237547893,
+      "f1": 0.9672447013487476,
+      "support": 522
+    },
+    "STUCK_PIPE": {
+      "precision": 0.7,
+      "recall": 0.5833333333333334,
+      "f1": 0.6363636363636364,
+      "support": 24
+    },
+    "MUD_LOSS": {
+      "precision": 0.6451612903225806,
+      "recall": 0.6896551724137931,
+      "f1": 0.6666666666666666,
+      "support": 29
+    },
+    "HIGH_TORQUE": {
+      "precision": 0.5151515151515151,
+      "recall": 0.68,
+      "f1": 0.5862068965517241,
+      "support": 25
+    }
+  },
+  "confusion_matrix": [
+    [
+      502,
+      3,
+      10,
+      7
+    ],
+    [
+      1,
+      14,
+      0,
+      9
+    ],
+    [
+      9,
+      0,
+      20,
+      0
+    ],
+    [
+      4,
+      3,
+      1,
+      17
+    ]
+  ],
+  "confusion_matrix_order": [
+    "NORMAL",
+    "STUCK_PIPE",
+    "MUD_LOSS",
+    "HIGH_TORQUE"
+  ],
+  "training_timestamp": "2026-09-20T18:57:11.492766+00:00",
+  "dataset_note": "Training used synthetic NWIS drilling_logs. This is not production-ready.",
+  "limitations": [
+    "Dataset is synthetic.",
+    "Real-world drilling data is required for production validation.",
+    "Probabilities come from predict_proba and are not calibrated.",
+    "Group-aware well split tests generalization to unseen wells in this synthetic set only."
+  ]
+}

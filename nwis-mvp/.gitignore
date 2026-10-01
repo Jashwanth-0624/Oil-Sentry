@@ -1,0 +1,15 @@
+backend/venv/
+backend/.venv/
+backend/.env
+backend/env
+frontend/node_modules/
+frontend/.env
+frontend/dist/
+.env
+*.pyc
+__pycache__/
+.vscode/
+*.log
+!ml/models/risk_model.joblib
+!ml/models/model_metadata.json
+tmp/

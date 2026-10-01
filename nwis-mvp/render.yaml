@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: oil-sentry-backend
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: FRONTEND_URL
+        value: https://oil-sentry.vercel.app
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash-lite
+      - key: EMBEDDING_LOCAL_FILES_ONLY
+        value: "true"
