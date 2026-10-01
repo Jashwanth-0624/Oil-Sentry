@@ -8,6 +8,7 @@ websockets>=13.0.0
 # Database & Geospatial Extensions
 sqlalchemy>=2.0.0
 psycopg2-binary>=2.9.9
+psycopg[binary]>=3.1.0
 geoalchemy2>=0.15.0
 shapely>=2.0.0
 geopandas>=1.0.0
