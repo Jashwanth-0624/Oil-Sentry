@@ -1,7 +1,7 @@
 databases:
   - name: nwis-postgres
     databaseName: nwis
-    user: postgres
+    user: nwis_user
     plan: free
     region: oregon
 
