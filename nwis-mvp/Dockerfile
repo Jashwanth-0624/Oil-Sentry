@@ -26,6 +26,8 @@ COPY rag/ ./rag/
 COPY data/ ./data/
 COPY frontend/dist/ ./frontend/dist/
 
+WORKDIR /app/backend
+
 # Expose default HTTP/WebSocket port
 EXPOSE 8000
 

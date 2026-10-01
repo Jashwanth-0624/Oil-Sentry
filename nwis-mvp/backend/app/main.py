@@ -61,13 +61,17 @@ app.include_router(websocket_router)
 @app.on_event("startup")
 def create_tables() -> None:
 	if engine is not None:
-		with engine.begin() as connection:
-			connection.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
+		try:
+			with engine.begin() as connection:
+				connection.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
+		except Exception as postgis_err:
+			print(f"PostGIS extension notice (may already exist or managed by cloud provider): {postgis_err}")
+
 		try:
 			with engine.begin() as connection:
 				connection.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
 		except Exception:
-			# pgvector is optional for this phase and is not installed on the current server.
+			# pgvector is optional and may be managed by cloud provider.
 			pass
 		Base.metadata.create_all(bind=engine)
 
@@ -101,7 +105,13 @@ def database_test(database: Session = Depends(get_db)) -> dict[str, str]:
 		raise HTTPException(status_code=500, detail=f"Database connection failed: {exc}") from exc
 
 
-frontend_dist = Path(__file__).resolve().parents[3] / "frontend" / "dist"
+candidate_paths = [
+	Path(__file__).resolve().parents[2] / "frontend" / "dist",
+	Path(__file__).resolve().parents[3] / "nwis-mvp" / "frontend" / "dist",
+	Path(__file__).resolve().parents[3] / "frontend" / "dist",
+]
+frontend_dist = next((p for p in candidate_paths if (p / "index.html").exists()), candidate_paths[0])
+
 if (frontend_dist / "index.html").exists():
 	if (frontend_dist / "assets").exists():
 		app.mount("/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="frontend_assets")

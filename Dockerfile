@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 COPY nwis-mvp/ ./nwis-mvp/
 
-WORKDIR /app/nwis-mvp
+WORKDIR /app/nwis-mvp/backend
 
 EXPOSE 8000
 
