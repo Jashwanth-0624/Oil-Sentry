@@ -63,18 +63,21 @@ def _background_seed_if_empty() -> None:
 	try:
 		from sqlalchemy.orm import Session
 		from app.models.well import Well
+		needs_seed = False
 		with Session(engine) as session:
 			well_count = session.query(Well).count()
 			if well_count == 0:
-				print("No wells found in database. Starting background dataset loading...")
-				try:
-					from data.load_data import main as seed_data
-					seed_data()
-					print("Background dataset loading completed successfully.")
-				except Exception as seed_err:
-					print(f"Background dataset auto-seeding error: {seed_err}")
+				needs_seed = True
 			else:
 				print(f"Database already populated with {well_count} wells.")
+		if needs_seed:
+			print("No wells found in database. Starting background dataset loading...")
+			try:
+				from data.load_data import main as seed_data
+				seed_data(clear_existing=False)
+				print("Background dataset loading completed successfully.")
+			except Exception as seed_err:
+				print(f"Background dataset auto-seeding error: {seed_err}")
 	except Exception as check_err:
 		print(f"Database readiness check notice: {check_err}")
 

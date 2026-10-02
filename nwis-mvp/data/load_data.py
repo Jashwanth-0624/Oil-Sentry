@@ -222,7 +222,7 @@ def validate_counts(session: Session, frames: dict[str, pd.DataFrame]) -> None:
     print("Database validation successful.")
 
 
-def main() -> None:
+def main(clear_existing: bool = True) -> None:
     print("NWIS Synthetic Dataset Loader")
     print("--------------------------------")
     print("Reading CSV files...")
@@ -230,7 +230,8 @@ def main() -> None:
     session = SessionLocal()
     try:
         with session.begin():
-            clear_existing_data(session)
+            if clear_existing:
+                clear_existing_data(session)
             print("Loading wells...")
             well_ids = load_wells(session, frames["wells"])
             print("Loading formations...")
