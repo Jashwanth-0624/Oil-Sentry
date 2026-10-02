@@ -1,3 +1,4 @@
+import threading
 from pathlib import Path
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -58,6 +59,26 @@ app.include_router(websocket_router)
 
 
 
+def _background_seed_if_empty() -> None:
+	try:
+		from sqlalchemy.orm import Session
+		from app.models.well import Well
+		with Session(engine) as session:
+			well_count = session.query(Well).count()
+			if well_count == 0:
+				print("No wells found in database. Starting background dataset loading...")
+				try:
+					from data.load_data import main as seed_data
+					seed_data()
+					print("Background dataset loading completed successfully.")
+				except Exception as seed_err:
+					print(f"Background dataset auto-seeding error: {seed_err}")
+			else:
+				print(f"Database already populated with {well_count} wells.")
+	except Exception as check_err:
+		print(f"Database readiness check notice: {check_err}")
+
+
 @app.on_event("startup")
 def create_tables() -> None:
 	if engine is not None:
@@ -75,20 +96,9 @@ def create_tables() -> None:
 			pass
 		Base.metadata.create_all(bind=engine)
 
-		# Auto-seed database if empty (ensures cloud deployments initialize automatically)
-		try:
-			from sqlalchemy.orm import Session
-			from app.models.well import Well
-			with Session(engine) as session:
-				well_count = session.query(Well).count()
-				if well_count == 0:
-					try:
-						from data.load_data import main as seed_data
-						seed_data()
-					except Exception as seed_err:
-						print(f"Initial dataset auto-seeding error: {seed_err}")
-		except Exception as check_err:
-			print(f"Database readiness check notice: {check_err}")
+		# Run data seeding in a background daemon thread so Uvicorn opens the port INSTANTLY!
+		threading.Thread(target=_background_seed_if_empty, daemon=True).start()
+
 
 
 @app.get("/health")

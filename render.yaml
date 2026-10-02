@@ -28,3 +28,5 @@ services:
         value: gemini-3.5-flash-lite
       - key: EMBEDDING_LOCAL_FILES_ONLY
         value: "true"
+      - key: PORT
+        value: "10000"
