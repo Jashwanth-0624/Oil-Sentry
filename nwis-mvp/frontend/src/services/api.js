@@ -3,33 +3,49 @@
  */
 import axios from "axios";
 
-function getBaseUrl() {
+export function resolveApiBaseUrl() {
   const envUrl =
     import.meta.env.VITE_API_BASE_URL ||
     import.meta.env.VITE_API_URL;
-  if (envUrl) return envUrl;
-
-  if (typeof window !== "undefined" && window.location) {
-    // When running in production on Render or custom domain, use relative same-origin calls
-    if (
-      window.location.hostname !== "localhost" &&
-      window.location.hostname !== "127.0.0.1"
-    ) {
-      return "";
-    }
+  if (envUrl && envUrl.trim()) {
+    return envUrl.trim().replace(/\/$/, "");
   }
 
-  return "http://localhost:8000";
+  if (typeof window !== "undefined" && window.location) {
+    const hostname = window.location.hostname || "";
+    // If hosted on Vercel, Netlify, or any remote frontend host, talk to the live Render backend
+    if (hostname.includes("vercel.app") || hostname.includes("netlify.app")) {
+      return "https://oil-sentry-backend.onrender.com";
+    }
+    // If hosted directly on Render, relative calls work seamlessly on same-origin
+    if (hostname.includes("onrender.com")) {
+      return "";
+    }
+    // If running locally on localhost, point to live Render backend for convenience
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return "https://oil-sentry-backend.onrender.com";
+    }
+    return "";
+  }
+
+  return "https://oil-sentry-backend.onrender.com";
 }
 
-const baseURL = getBaseUrl();
-
 const api = axios.create({
-  baseURL,
   headers: {
     "Content-Type": "application/json",
   },
   timeout: 30000,
+});
+
+api.interceptors.request.use((config) => {
+  const base = resolveApiBaseUrl();
+  if (base) {
+    config.baseURL = base;
+  } else {
+    delete config.baseURL;
+  }
+  return config;
 });
 
 /**
@@ -166,7 +182,9 @@ export async function getWellReport(wellId) {
  * Generate full URL to stream/download the PDF operational intelligence report.
  */
 export function getWellReportPdfUrl(wellId) {
-  return `${baseURL}/api/reports/wells/${encodeURIComponent(wellId)}/pdf`;
+  const base = resolveApiBaseUrl();
+  const prefix = base ? base : (typeof window !== "undefined" ? window.location.origin : "");
+  return `${prefix}/api/reports/wells/${encodeURIComponent(wellId)}/pdf`;
 }
 
 /**

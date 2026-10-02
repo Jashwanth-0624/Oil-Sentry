@@ -4,7 +4,7 @@ import ServiceStatus from "../components/system/ServiceStatus";
 import MetricCard from "../components/common/MetricCard";
 import LoadingState from "../components/common/LoadingState";
 import { Server, Database, Brain, Cpu, RefreshCw, CheckCircle, AlertTriangle } from "lucide-react";
-import { checkHealth, checkDbTest, queryRag } from "../services/api";
+import { checkHealth, checkDbTest, queryRag, resolveApiBaseUrl } from "../services/api";
 
 export default function SystemStatus() {
   const [fastapiStatus, setFastapiStatus] = useState("OPERATIONAL");
@@ -46,19 +46,22 @@ export default function SystemStatus() {
     checkServices();
   }, []);
 
+  const apiBase = resolveApiBaseUrl() || (typeof window !== "undefined" && window.location ? window.location.origin : "");
+  const apiEndpointDisplay = apiBase ? `${apiBase.replace(/^https?:\/\//, "")}/api` : "/api";
+
   const services = [
     {
       name: "FastAPI REST API",
       tech: "Uvicorn / FastAPI 0.115",
       status: fastapiStatus,
-      endpoint: "HTTP 8000 /api",
+      endpoint: apiEndpointDisplay,
       details: "High-performance asynchronous orchestration gateway.",
     },
     {
       name: "Relational Database",
       tech: "PostgreSQL 18.3",
       status: dbStatus,
-      endpoint: "localhost:5432 / nwis",
+      endpoint: "nwis-postgres / nwis (Cloud)",
       details: "Core relational persistence: 20 wells, 86 formations, 3000 logs, 43 events.",
     },
     {

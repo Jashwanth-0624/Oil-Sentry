@@ -6,27 +6,25 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 export function getWebSocketUrl() {
   const customWs = import.meta.env.VITE_WS_URL;
-  if (customWs) return customWs;
+  if (customWs && customWs.trim()) return customWs.trim();
 
   const apiUrl =
     import.meta.env.VITE_API_BASE_URL ||
     import.meta.env.VITE_API_URL;
-  if (apiUrl) {
-    return apiUrl.replace(/^http/, "ws") + "/ws/live";
+  if (apiUrl && apiUrl.trim()) {
+    return apiUrl.trim().replace(/^http/, "ws") + "/ws/live";
   }
 
   if (typeof window !== "undefined" && window.location) {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    if (
-      window.location.hostname !== "localhost" &&
-      window.location.hostname !== "127.0.0.1"
-    ) {
-      return `${protocol}//${window.location.host}/ws/live`;
+    const hostname = window.location.hostname || "";
+    if (hostname.includes("vercel.app") || hostname.includes("netlify.app") || hostname === "localhost" || hostname === "127.0.0.1") {
+      return "wss://oil-sentry-backend.onrender.com/ws/live";
     }
-    return `${protocol}//127.0.0.1:8000/ws/live`;
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    return `${protocol}//${window.location.host}/ws/live`;
   }
 
-  return "ws://127.0.0.1:8000/ws/live";
+  return "wss://oil-sentry-backend.onrender.com/ws/live";
 }
 
 export function useLiveTelemetry({
