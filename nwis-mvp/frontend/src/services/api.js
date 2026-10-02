@@ -4,28 +4,30 @@
 import axios from "axios";
 
 export function resolveApiBaseUrl() {
-  const envUrl =
-    import.meta.env.VITE_API_BASE_URL ||
-    import.meta.env.VITE_API_URL;
-  if (envUrl && envUrl.trim()) {
-    return envUrl.trim().replace(/\/$/, "");
-  }
-
   if (typeof window !== "undefined" && window.location) {
     const hostname = window.location.hostname || "";
-    // If hosted on Vercel, Netlify, or any remote frontend host, talk to the live Render backend
-    if (hostname.includes("vercel.app") || hostname.includes("netlify.app")) {
-      return "https://oil-sentry-backend.onrender.com";
-    }
     // If hosted directly on Render, relative calls work seamlessly on same-origin
     if (hostname.includes("onrender.com")) {
       return "";
     }
-    // If running locally on localhost, point to live Render backend for convenience
-    if (hostname === "localhost" || hostname === "127.0.0.1") {
+    // If hosted on Vercel, Netlify, or any remote frontend host, talk to the live Render backend
+    if (hostname.includes("vercel.app") || hostname.includes("netlify.app")) {
       return "https://oil-sentry-backend.onrender.com";
     }
-    return "";
+
+    const envUrl =
+      import.meta.env.VITE_API_BASE_URL ||
+      import.meta.env.VITE_API_URL;
+    if (
+      envUrl &&
+      envUrl.trim() &&
+      !envUrl.includes("127.0.0.1") &&
+      !envUrl.includes("localhost")
+    ) {
+      return envUrl.trim().replace(/\/$/, "");
+    }
+
+    return "https://oil-sentry-backend.onrender.com";
   }
 
   return "https://oil-sentry-backend.onrender.com";

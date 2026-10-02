@@ -5,23 +5,28 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 export function getWebSocketUrl() {
-  const customWs = import.meta.env.VITE_WS_URL;
-  if (customWs && customWs.trim()) return customWs.trim();
-
-  const apiUrl =
-    import.meta.env.VITE_API_BASE_URL ||
-    import.meta.env.VITE_API_URL;
-  if (apiUrl && apiUrl.trim()) {
-    return apiUrl.trim().replace(/^http/, "ws") + "/ws/live";
-  }
-
   if (typeof window !== "undefined" && window.location) {
     const hostname = window.location.hostname || "";
-    if (hostname.includes("vercel.app") || hostname.includes("netlify.app") || hostname === "localhost" || hostname === "127.0.0.1") {
+    if (hostname.includes("onrender.com")) {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      return `${protocol}//${window.location.host}/ws/live`;
+    }
+
+    if (hostname.includes("vercel.app") || hostname.includes("netlify.app")) {
       return "wss://oil-sentry-backend.onrender.com/ws/live";
     }
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    return `${protocol}//${window.location.host}/ws/live`;
+
+    const customWs = import.meta.env.VITE_WS_URL;
+    if (
+      customWs &&
+      customWs.trim() &&
+      !customWs.includes("127.0.0.1") &&
+      !customWs.includes("localhost")
+    ) {
+      return customWs.trim();
+    }
+
+    return "wss://oil-sentry-backend.onrender.com/ws/live";
   }
 
   return "wss://oil-sentry-backend.onrender.com/ws/live";
